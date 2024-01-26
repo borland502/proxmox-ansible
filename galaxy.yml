@@ -2,13 +2,13 @@
 # The namespace of the collection. This can be a company/brand/organization or product namespace under which all
 # content lives. May only contain alphanumeric lowercase characters and underscores. Namespaces cannot start with
 # underscores or numbers and cannot contain consecutive underscores
-namespace: cielito
+namespace: technohouser
 
 # The name of the collection. Has the same character restrictions as 'namespace'
 name: proxmox
 
 # The version of the collection. Must be compatible with semantic versioning
-version: 1.2.0
+version: 1.2.1
 
 # The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md
@@ -23,7 +23,7 @@ authors:
 
 ### OPTIONAL but strongly recommended
 # A short summary description of the collection
-description: Some roles to manage an IaaS with Proxmox VE
+description: Some roles to manage an IaaS with Proxmox VE.  Please checkout the original authors work.  This is merely a fork.
 
 # Either a single license or a list of licenses for content inside of a collection. Ansible Galaxy currently only
 # accepts L(SPDX,https://spdx.org/licenses/) licenses. This key is mutually exclusive with 'license_file'
@@ -53,7 +53,7 @@ tags:
 dependencies: {}
 
 # The URL of the originating SCM repository
-repository: https://git.interior.edu.uy/cielito/proxmox
+repository: https://github.com/borland502/proxmox-ansible.git
 
 # The URL to any online docs
 documentation: https://git.interior.edu.uy/cielito/proxmox/-/wikis/home
