@@ -45,7 +45,7 @@
       hookscript: "{{ pve_lxc_hookscript | default(omit) }}"
       ostemplate: "{{ pve_lxc_ostemplate_storage | default('local') }}:{{ pve_lxc_ostemplate_content_type | default('vztmpl') }}/{{ pve_lxc_ostemplate_name if(pve_lxc_ostemplate_name is defined) else ( pve_lxc_ostemplate_url | urlsplit('path') | basename ) }}"
       hostname: "{{ pve_hostname }}"
-      vmid: "{{ pve_lxc_vmid | default(omit) }}"
+      vmid: "{{ pve_lxc_vmid | int | default(omit) }}"
       description: "{{ pve_lxc_description | default(omit) }}"
       pool: "{{ pve_pool | default(omit) }}"
       password: "{{ pve_lxc_root_password }}"
