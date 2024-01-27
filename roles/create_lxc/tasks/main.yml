@@ -25,7 +25,6 @@
       api_password: "{{ pve_api_password | default(omit) }}"
     when:
     - is_password_setup
-    - not is_token_setup
     register: pve_lxc_container_created
 
   - name: Create LXC from scratch in Proxmox node | Token
@@ -34,7 +33,6 @@
       api_token_secret: "{{ pve_api_token_secret | default(omit) }}"
     when:
     - is_token_setup
-    - not is_password_setup
     register: pve_lxc_container_created
 
   delegate_to: "{{ pve_api_host }}"
