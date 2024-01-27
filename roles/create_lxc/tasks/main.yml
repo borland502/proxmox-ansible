@@ -57,7 +57,6 @@
       swap: "{{ pve_lxc_swap | default(omit) }}"
       storage: "{{ pve_lxc_storage | default(omit) }}"
       disk: "{{ pve_lxc_disk | default(omit) }}"
-      ip_address: "{{ pve_lxc_ip_address | default(omit) }}"
       mounts: >-
         {   {%- for item in pve_lxc_mounts -%}
               "{{ item.id }}":"{{ item.storage|default('local-lvm') }}:{{ item.size|default(32) }},mp={{ item.mount_point|default('/mnt/mp0') }},{% if item.acl is defined %}{% if (item.acl) %}acl=1{% else %}acl=0{% endif %},{% endif %}{% if item.quota is defined and item.quota %}quota=1,{% endif %}{% if item.read_only is defined and item.read_only %}ro=1,{% endif %}{% if item.backup is defined and item.backup %}backup=1,{% endif %}{% if item.skip_replication is defined and item.skip_replication %}replicate=0{% endif %}",
