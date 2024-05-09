@@ -13,27 +13,31 @@
   ansible.builtin.include_tasks: template.yml
   when: pve_lxc_ostemplate_url is defined
   tags:
-  - pve_descarga
-  - pve_download
+    - pve_descarga
+    - pve_download
+
+- name: Remove any existing hostkey
+  ansible.builtin.known_hosts:
+    name: "{{ pve_hostname }}"
+    state: absent
 
 # Creando el container
 - name: Create the container
   block:
+    - name: Create LXC from scratch in Proxmox node | password
+      community.general.proxmox:
+        api_password: "{{ pve_api_password | default(omit) }}"
+      when:
+        - is_password_setup
+      register: pve_lxc_container_created
 
-  - name: Create LXC from scratch in Proxmox node | password
-    community.general.proxmox:
-      api_password: "{{ pve_api_password | default(omit) }}"
-    when:
-    - is_password_setup
-    register: pve_lxc_container_created
-
-  - name: Create LXC from scratch in Proxmox node | Token
-    community.general.proxmox:
-      api_token_id: "{{ pve_api_token_id | default(omit) }}"
-      api_token_secret: "{{ pve_api_token_secret | default(omit) }}"
-    when:
-    - is_token_setup
-    register: pve_lxc_container_created
+    - name: Create LXC from scratch in Proxmox node | Token
+      community.general.proxmox:
+        api_token_id: "{{ pve_api_token_id | default(omit) }}"
+        api_token_secret: "{{ pve_api_token_secret | default(omit) }}"
+      when:
+        - is_token_setup
+      register: pve_lxc_container_created
 
   delegate_to: "{{ pve_api_host }}"
   module_defaults:
@@ -84,8 +88,8 @@
   delegate_to: "{{ pve_api_host }}"
   register: pve_lxc_extracted_vmid
   when:
-  - pve_lxc_vmid is not defined
-  - pve_lxc_container_created is succeeded
+    - pve_lxc_vmid is not defined
+    - pve_lxc_container_created is succeeded
 
 # Establecer variable con el VMID correspondiente para el contenedor en caso de que no haya sido definido
 - name: Set variable with the corresponding VMID for the container in case it has not been defined
@@ -93,40 +97,40 @@
     pve_lxc_inferred_vmid: "{{ pve_lxc_vmid if (pve_lxc_vmid is defined) else pve_lxc_extracted_vmid.stdout }}"
 
 - block:
-  # Para las configuraciones que el módulo community.general.proxmox no cuente con un parámetro específico, esta
-  # tarea permite establecerlas modificando directamente el archivo de configuración del contenedor en su nodo
-  # For configurations that the community.general.proxmox module does not have a specific parameter, this
-  # task allows setting them by directly modifying the container configuration file in its node
-  - name: Additional configurations directly on the container .conf file
-    ansible.builtin.lineinfile:
-      unsafe_writes: yes # Otherwise Proxmox denies permission
-      path: /etc/pve/nodes/{{ pve_node }}/lxc/{{ pve_lxc_inferred_vmid }}.conf
-      regexp: "{{ item.regexp }}"
-      line: "{{ item.line }}"
-      state: "{{ item.state | default(omit) }}"
-    with_items: "{{ pve_lxc_additional_configurations }}"
-    delegate_to: "{{ pve_api_host }}"
-    register: pve_lxc_additional_configurations_result
-    when: pve_lxc_additional_configurations is defined
+    # Para las configuraciones que el módulo community.general.proxmox no cuente con un parámetro específico, esta
+    # tarea permite establecerlas modificando directamente el archivo de configuración del contenedor en su nodo
+    # For configurations that the community.general.proxmox module does not have a specific parameter, this
+    # task allows setting them by directly modifying the container configuration file in its node
+    - name: Additional configurations directly on the container .conf file
+      ansible.builtin.lineinfile:
+        unsafe_writes: yes # Otherwise Proxmox denies permission
+        path: /etc/pve/nodes/{{ pve_node }}/lxc/{{ pve_lxc_inferred_vmid }}.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: "{{ item.state | default(omit) }}"
+      with_items: "{{ pve_lxc_additional_configurations }}"
+      delegate_to: "{{ pve_api_host }}"
+      register: pve_lxc_additional_configurations_result
+      when: pve_lxc_additional_configurations is defined
 
-  - name: Stop the LXC CT | password
-    community.general.proxmox:
-      api_password: "{{ pve_api_password | default(omit) }}"
-    when:
-    - is_password_setup
-    - not is_token_setup
-    - pve_lxc_additional_configurations_result is changed
-    delegate_to: "{{ pve_api_host }}"
+    - name: Stop the LXC CT | password
+      community.general.proxmox:
+        api_password: "{{ pve_api_password | default(omit) }}"
+      when:
+        - is_password_setup
+        - not is_token_setup
+        - pve_lxc_additional_configurations_result is changed
+      delegate_to: "{{ pve_api_host }}"
 
-  - name: Stop the LXC CT | Token
-    community.general.proxmox:
-      api_token_id: "{{ pve_api_token_id | default(omit) }}"
-      api_token_secret: "{{ pve_api_token_secret | default(omit) }}"
-    when:
-    - is_token_setup
-    - not is_password_setup
-    - pve_lxc_additional_configurations_result is changed
-    delegate_to: "{{ pve_api_host }}"
+    - name: Stop the LXC CT | Token
+      community.general.proxmox:
+        api_token_id: "{{ pve_api_token_id | default(omit) }}"
+        api_token_secret: "{{ pve_api_token_secret | default(omit) }}"
+      when:
+        - is_token_setup
+        - not is_password_setup
+        - pve_lxc_additional_configurations_result is changed
+      delegate_to: "{{ pve_api_host }}"
 
   module_defaults:
     community.general.proxmox:
@@ -145,14 +149,13 @@
 # Asegurarse de que el contenedor esté encendido
 - name: Ensure the container is turned on
   block:
-
     - name: Ensure the container is turned on | password
       community.general.proxmox:
         api_password: "{{ pve_api_password | default(omit) }}"
       when:
-      - is_password_setup
-      - not is_token_setup
-      - (pve_lxc_container_created is not defined) or (pve_lxc_container_created is succeeded)
+        - is_password_setup
+        - not is_token_setup
+        - (pve_lxc_container_created is not defined) or (pve_lxc_container_created is succeeded)
       delegate_to: "{{ pve_api_host }}"
       notify: pve_lxc wait for connection
 
@@ -161,9 +164,9 @@
         api_token_id: "{{ pve_api_token_id | default(omit) }}"
         api_token_secret: "{{ pve_api_token_secret | default(omit) }}"
       when:
-      - is_token_setup
-      - not is_password_setup
-      - (pve_lxc_container_created is not defined) or (pve_lxc_container_created is succeeded)
+        - is_token_setup
+        - not is_password_setup
+        - (pve_lxc_container_created is not defined) or (pve_lxc_container_created is succeeded)
       delegate_to: "{{ pve_api_host }}"
       notify: pve_lxc wait for connection
 
@@ -175,5 +178,3 @@
       vmid: "{{ pve_lxc_inferred_vmid }}"
       state: started
       timeout: 120
-
-...

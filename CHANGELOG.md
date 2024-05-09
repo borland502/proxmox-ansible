@@ -1,4 +1,12 @@
-# Change Log of ansible collection [`cielito.proxmox`](https://git.interior.edu.uy/cielito/proxmox)
+# Change Log of forked ansible collection [`technohouser.proxmox`](https://github.com/borland502/proxmox-ansible)
+
+## [v1.2.2]
+
+Remove the host key in the known_hosts file for ansible if present
+
+## [v1.2.1]
+
+- Forked project to use as part of dasbootstrap
 
 ## [v1.2.0](https://git.interior.edu.uy/cielito/proxmox/tree/v1.2.0)
 
